@@ -31,7 +31,17 @@
 // authorName : java.lang.String
 load(__DIR__ + '../utils.js');
 
-var FIX_VERSION = "2.20";
+function getVersionParam(){
+   if(command.getArguments().length > 0 && command.getArguments().get(0).trim().length > 0){
+       var regexp = /version=((\d|.)+)/;
+       var result = regexp.exec(command.getArguments().get(0).trim());
+       if(result && result.length > 1) {
+           return result[1];
+       }
+   }
+   return null;
+}
+
 var NO_STATUS = "git.repository.smartcommits.transition.error.unknownstatus";
 var MULTIPLE_ACTIONS_TEMPLATE = "git.repository.smartcommits.transition.error.ambiguous";
 var NO_ALLOWED_ACTIONS_TEMPLATE = "git.repository.smartcommits.transition.error.noactions";
@@ -41,39 +51,44 @@ var workflowManager = getComponent("com.atlassian.jira.workflow.WorkflowManager"
 var issueManager = getComponent("com.atlassian.jira.issue.IssueManager");
 var i18nHelper = getComponent("com.atlassian.jira.util.I18nHelper");
 
-var status = issue.getStatus();
-var possibleActionsList = getAcceptedNextSteps(workflowManager, issue);
-var commandName = command.getCommandName().replace( /-/g, " " );
-if(possibleActionsList.length > 0) {
-    var newStatusId = getIdForStatusWithNameIgnoreCase(commandName, possibleActionsList);
-    if(newStatusId) {
-        var issueService = getComponent("com.atlassian.jira.bc.issue.IssueService");
-        var versionManager = getComponent("com.atlassian.jira.project.version.VersionManager");
-        var version = versionManager.getVersion(issue.getProjectObject().getId(), FIX_VERSION);
-        if(version) {
-            issue.getFixVersions().clear();
-            var issueInputParameters = issueService.newIssueInputParameters();
-            issueInputParameters.setFixVersionIds([version.getId()]);
-            var transitionValidationResult = issueService.validateTransition(
-                user, issue.getId(), newStatusId, issueInputParameters
-            );
-            if (transitionValidationResult.isValid()) {
-                var transitionResult =  issueService.transition(user, transitionValidationResult);
+var fixVersion = getVersionParam();
+if(fixVersion) {
+    var status = issue.getStatus();
+    var possibleActionsList = getAcceptedNextSteps(workflowManager, issue);
+    var commandName = command.getCommandName().replace( /-/g, " " );
+    if(possibleActionsList.length > 0) {
+        var newStatusId = getIdForStatusWithNameIgnoreCase(commandName, possibleActionsList);
+        if(newStatusId) {
+            var issueService = getComponent("com.atlassian.jira.bc.issue.IssueService");
+            var versionManager = getComponent("com.atlassian.jira.project.version.VersionManager");
+            var version = versionManager.getVersion(issue.getProjectObject().getId(), fixVersion);
+            if(version) {
+                issue.getFixVersions().clear();
+                var issueInputParameters = issueService.newIssueInputParameters();
+                issueInputParameters.setFixVersionIds([version.getId()]);
+                var transitionValidationResult = issueService.validateTransition(
+                    user, issue.getId(), newStatusId, issueInputParameters
+                );
+                if (transitionValidationResult.isValid()) {
+                    var transitionResult =  issueService.transition(user, transitionValidationResult);
+                } else {
+                    // Report errors if any
+                    for each (var err in transitionValidationResult.getErrorCollection().getErrors()) {
+            	        commandResult.addError(err);
+                    }
+                    for each (var err in transitionValidationResult.getErrorCollection().getErrorMessages()) {
+            	        commandResult.addError(err);
+                    }
+                }
             } else {
-                // Report errors if any
-                for each (var err in transitionValidationResult.getErrorCollection().getErrors()) {
-            	    commandResult.addError(err);
-                }
-                for each (var err in transitionValidationResult.getErrorCollection().getErrorMessages()) {
-            	    commandResult.addError(err);
-                }
+                commandResult.addError(formError(issue, i18nHelper, commandName, UNKNOWN_VERSION));
             }
         } else {
-            commandResult.addError(formError(issue, i18nHelper, commandName, UNKNOWN_VERSION));
+            commandResult.addError(formError(issue, i18nHelper, commandName, NO_ALLOWED_ACTIONS_TEMPLATE));
         }
     } else {
-        commandResult.addError(formError(issue, i18nHelper, commandName, NO_ALLOWED_ACTIONS_TEMPLATE));
+         commandResult.addError(formError(issue, i18nHelper, commandName, NO_ALLOWED_ACTIONS_TEMPLATE));
     }
 } else {
-   commandResult.addError(formError(issue, i18nHelper, commandName, NO_ALLOWED_ACTIONS_TEMPLATE));
+    commandResult.addError(formError(issue, i18nHelper, commandName, UNKNOWN_VERSION));
 }
