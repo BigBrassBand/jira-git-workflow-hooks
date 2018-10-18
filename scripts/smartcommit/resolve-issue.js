@@ -1,4 +1,4 @@
-//# sourceURL=duedate.js
+//# sourceURL=resolve-issue.js
 'use strict';
 
 //  Classes passed as parameters by default
@@ -31,65 +31,49 @@
 // authorName : java.lang.String
 load(__DIR__ + '../utils.js');
 
-var fixVersion = "2.0";
+var FIX_VERSION = "2.20";
+var NO_STATUS = "git.repository.smartcommits.transition.error.unknownstatus";
+var MULTIPLE_ACTIONS_TEMPLATE = "git.repository.smartcommits.transition.error.ambiguous";
+var NO_ALLOWED_ACTIONS_TEMPLATE = "git.repository.smartcommits.transition.error.noactions";
+var UNKNOWN_VERSION = "git.repository.smartcommits.error.unknown-version";
+
 var workflowManager = getComponent("com.atlassian.jira.workflow.WorkflowManager");
 var issueManager = getComponent("com.atlassian.jira.issue.IssueManager");
+var i18nHelper = getComponent("com.atlassian.jira.util.I18nHelper");
 
 var status = issue.getStatus();
 var possibleActionsList = getAcceptedNextSteps(workflowManager, issue);
 var commandName = command.getCommandName().replace( /-/g, " " );
-var newStatusId = getIdForStatusWithNameIgnoreCase(commandName, possibleActionsList);
-if(newStatusId) {
-    var issueService = getComponent("com.atlassian.jira.bc.issue.IssueService");
-    var versionManager = getComponent("com.atlassian.jira.project.version.VersionManager");
-    var version = versionManager.getVersion(issue.getProjectObject().getId(), fixVersion);
-    if(version) {
-        issue.getFixVersions().clear();
-        var issueInputParameters = issueService.newIssueInputParameters();
-        issueInputParameters.setFixVersionIds([version.getId()]);
-        var transitionValidationResult = issueService.validateTransition(
-            user, issue.getId(), newStatusId, issueInputParameters
-        );
-        if (transitionValidationResult.isValid()) {
-            var transitionResult =  issueService.transition(user, transitionValidationResult);
+if(possibleActionsList.length > 0) {
+    var newStatusId = getIdForStatusWithNameIgnoreCase(commandName, possibleActionsList);
+    if(newStatusId) {
+        var issueService = getComponent("com.atlassian.jira.bc.issue.IssueService");
+        var versionManager = getComponent("com.atlassian.jira.project.version.VersionManager");
+        var version = versionManager.getVersion(issue.getProjectObject().getId(), FIX_VERSION);
+        if(version) {
+            issue.getFixVersions().clear();
+            var issueInputParameters = issueService.newIssueInputParameters();
+            issueInputParameters.setFixVersionIds([version.getId()]);
+            var transitionValidationResult = issueService.validateTransition(
+                user, issue.getId(), newStatusId, issueInputParameters
+            );
+            if (transitionValidationResult.isValid()) {
+                var transitionResult =  issueService.transition(user, transitionValidationResult);
+            } else {
+                // Report errors if any
+                for each (var err in transitionValidationResult.getErrorCollection().getErrors()) {
+            	    commandResult.addError(err);
+                }
+                for each (var err in transitionValidationResult.getErrorCollection().getErrorMessages()) {
+            	    commandResult.addError(err);
+                }
+            }
         } else {
-            print(transitionValidationResult.getErrorCollection());
-            // Report errors if any
-            for each (var err in transitionValidationResult.getErrorCollection().getErrors()) {
-            	commandResult.addError(err);
-            }
-            for each (var err in transitionValidationResult.getErrorCollection().getErrorMessages()) {
-            	commandResult.addError(err);
-            }
+            commandResult.addError(formError(issue, i18nHelper, commandName, UNKNOWN_VERSION));
         }
     } else {
-        //TODO send email
+        commandResult.addError(formError(issue, i18nHelper, commandName, NO_ALLOWED_ACTIONS_TEMPLATE));
     }
-
 } else {
-//TODO send email
-}
-
-
-
-var issueService = getComponent("com.atlassian.jira.bc.issue.IssueService");
-
-// Create parameters for update
-var issueInputParameters = issueService.newIssueInputParameters();
-issueInputParameters.setDueDate(command.getArguments().get(0));
-
-// Call validate
-var validateResult = issueService.validateUpdate(user, issue.getId(), issueInputParameters);
-
-// Check for error and call the operation
-if (!validateResult.getErrorCollection().hasAnyErrors()) {
-	issueService.update(user, validateResult);
-} else {
-	// Report errors if any
-	for each (var err in validateResult.getErrorCollection().getErrors()) {
-		commandResult.addError(err);
-	}
-	for each (var err in validateResult.getErrorCollection().getErrorMessages()) {
-		commandResult.addError(err);
-	}
+   commandResult.addError(formError(issue, i18nHelper, commandName, NO_ALLOWED_ACTIONS_TEMPLATE));
 }
