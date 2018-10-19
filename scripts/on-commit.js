@@ -30,19 +30,31 @@
 
 load(__DIR__ + 'utils.js');
 
+function getUser(){
+    var crowdService = getComponent("com.atlassian.jira.plugins.dvcs.smartcommits.GitPluginCompatibilityCrowdService");
+    var users = crowdService.getUserByEmailOrNull(authorEmail, authorName);
+
+    if (users.isEmpty()) {
+    	print("Unknown Jira user");
+    } else if (users.size() > 1) {
+    	print("Ambiguous jira user");
+    } else {
+    	return users.get(0);
+    }
+}
+
 var IN_PROGRESS = "Start Progress";
 var OPEN = "Open";
 
 var workflowManager = getComponent("com.atlassian.jira.workflow.WorkflowManager");
 var issueManager = getComponent("com.atlassian.jira.issue.IssueManager");
-var userService = getComponent("com.bigbrassband.jira.git.services.users.GitJiraUsersUtil");
 
+var user = getUser();
 var issueKey = getIssueKey(branchName);
-if(issueKey !== null) {
+if(issueKey !== null && user !== null) {
     var issue = issueManager.getIssueByCurrentKey(issueKey);
     var status = issue.getStatus();
-    var user = userService.getUserByEmail(authorEmail);
-    print(user);
+
     if(status.getName() === OPEN) {
         var possibleActionsList = getAcceptedNextSteps(workflowManager, issue);
         var newStatusId = getIdForStatusWithName(IN_PROGRESS, possibleActionsList);
