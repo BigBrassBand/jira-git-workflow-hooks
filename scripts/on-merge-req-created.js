@@ -72,7 +72,11 @@ if (issueKey !== null) {
             if (transitionValidationResult.isValid()) {
                 var transitionResult = issueService.transition(user, transitionValidationResult);
             } else {
-                print("On-merge-req-created script execution - errors during transition:");
+                print("On-merge-req-created script execution:");
+                print("repositoryName =", repositoryName);
+                print("sourceBranch =", pullreq.sourceBranch);
+                print("targetBranch =", pullreq.targetBranch);
+                print("Errors during transition:");
                 print(transitionValidationResult.getErrorCollection());
             }
         }
