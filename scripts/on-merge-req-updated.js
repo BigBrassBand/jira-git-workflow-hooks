@@ -1,6 +1,18 @@
 //# sourceURL=on-merge-req-created.js
 'use strict';
-
+//  Description
+//
+// This script work as a handler that checks if an issue is in in progress status.
+// If it is, then automatically transition to done.
+// It works in suggestion that issue key is present in the title of merge request.
+// First issue's key from merge/pull request title will be taken as issue for transition.
+// Issue's status will be changed on behalf of issue's assignee.
+// https://github.com/BigBrassBand/jira-git-workflow-hooks
+//
+//  Applying
+// Set name of in progress status in constant IN_PROGRESS. By default "In Progress" is used.
+// Set name of needed transition in constant DONE. By default "Resolve Issue" is used.
+//
 //  Classes passed as parameters by default
 //
 //  A JSON object which contains the merge request data.
@@ -25,29 +37,45 @@
 
 load(__DIR__ + 'utils.js');
 
+//set required statuses names
 var IN_PROGRESS = "In Progress";
 var DONE = "Resolve Issue";
 
+//get needed components to execute main logic
 var workflowManager = getComponent("com.atlassian.jira.workflow.WorkflowManager");
 var issueManager = getComponent("com.atlassian.jira.issue.IssueManager");
 
+//extract input data from JSON to object
 var pullreq = JSON.parse(pullreqJson);
+//get first issue key present in request title
 var issueKey = getIssueKey(pullreq.title);
-if(issueKey !== null) {
+if (issueKey !== null) {
+    //find issue by key
     var issue = issueManager.getIssueByCurrentKey(issueKey);
     var status = issue.getStatus();
+    // use issue's assignee as user
     var user = issue.getAssignee();
-    if(status.getName() === IN_PROGRESS) {
+     // check that issue has IN_PROGRESS status
+    if (status.getName() === IN_PROGRESS) {
         var possibleActionsList = getAcceptedNextSteps(workflowManager, issue);
+        //retrieve new status id by his name from possible next statuses
         var newStatusId = getIdForStatusWithName(DONE, possibleActionsList);
-        if(newStatusId) {
+        //if new status name is correct
+        if (newStatusId) {
+            //get service to work with issue
             var issueService = getComponent("com.atlassian.jira.bc.issue.IssueService");
+            //validate changes
             var transitionValidationResult = issueService.validateTransition(
-            user, issue.getId(), newStatusId, issueService.newIssueInputParameters()
+                user, issue.getId(), newStatusId, issueService.newIssueInputParameters()
             );
             if (transitionValidationResult.isValid()) {
-                var transitionResult =  issueService.transition(user, transitionValidationResult);
+                var transitionResult = issueService.transition(user, transitionValidationResult);
             } else {
+                print("On-merge-req-updated script execution:");
+                print("repositoryName =", repositoryName);
+                print("sourceBranch =", pullreq.sourceBranch);
+                print("targetBranch =", pullreq.targetBranch);
+                print("Errors during transition:");
                 print(transitionValidationResult.getErrorCollection());
             }
         }
