@@ -72,19 +72,19 @@ var issueKey = getIssueKey(branchName);
 
 //validate user
 if (issueKey == null && user == null)
-    return;
+    exit();
 var issue = issueManager.getIssueByCurrentKey(issueKey);
 var status = issue.getStatus();
 
 //check status name
 if (status.getName() !== OPEN)
-    return;
+    exit();
 var possibleActionsList = getAcceptedNextSteps(workflowManager, issue);
 var newStatusId = getIdForStatusWithName(IN_PROGRESS, possibleActionsList);
 
 //check new status name
 if (newStatusId == null)
-    return;
+    exit();
 //validate transition
 var transitionValidationResult = issueService.validateTransition(
     user, issue.getId(), newStatusId, issueService.newIssueInputParameters()
@@ -96,6 +96,7 @@ if (!transitionValidationResult.isValid()) {
     print("revision =", revision);
     print("Errors during transition:");
     print(transitionValidationResult.getErrorCollection());
+} else {
+    // do transition
+    issueService.transition(user, transitionValidationResult);
 }
-// do transition
-issueService.transition(user, transitionValidationResult);
