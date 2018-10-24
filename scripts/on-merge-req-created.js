@@ -81,6 +81,7 @@ if (!transitionValidationResult.isValid()) {
     print("targetBranch =", pullreq.targetBranch);
     print("Errors during transition:");
     print(transitionValidationResult.getErrorCollection());
+} else {
+    //do transition
+    issueService.transition(user, transitionValidationResult);
 }
-//do transition
-issueService.transition(user, transitionValidationResult);
