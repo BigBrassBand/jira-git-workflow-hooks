@@ -43,34 +43,35 @@ var issueManager = getComponent("com.atlassian.jira.issue.IssueManager");
 
 //get first issue key present in branchName
 var issueKey = getIssueKey(branchName);
-if (issueKey !== null) {
-    //find issue by key
-    var issue = issueManager.getIssueByCurrentKey(issueKey);
-    var status = issue.getStatus();
-    // use issue's assignee as user
-    var user = issue.getAssignee();
-    // check that issue has OPEN status
-    if (status.getName() === OPEN) {
-        var possibleActionsList = getAcceptedNextSteps(workflowManager, issue);
-        //retrieve new status id by his name from possible next statuses
-        var newStatusId = getIdForStatusWithName(IN_PROGRESS, possibleActionsList);
-        //if new status name is correct
-        if (newStatusId) {
-            //get service to work with issue
-            var issueService = getComponent("com.atlassian.jira.bc.issue.IssueService");
-            //validate changes
-            var transitionValidationResult = issueService.validateTransition(
-                user, issue.getId(), newStatusId, issueService.newIssueInputParameters()
-            );
-            if (transitionValidationResult.isValid()) {
-                var transitionResult = issueService.transition(user, transitionValidationResult);
-            } else {
-                print("On-branch-created script execution:");
-                print("repositoryName =", repositoryName);
-                print("branchName =", branchName);
-                print("Errors during transition:");
-                print(transitionValidationResult.getErrorCollection());
-            }
-        }
-    }
+//check that issueKey is presenr in branch name
+if (issueKey == null)
+    exit();
+//find issue by key
+var issue = issueManager.getIssueByCurrentKey(issueKey);
+var status = issue.getStatus();
+// use issue's assignee as user
+var user = issue.getAssignee();
+// check that issue has OPEN status
+if (status.getName() !== OPEN)
+    exit();
+var possibleActionsList = getAcceptedNextSteps(workflowManager, issue);
+//retrieve new status id by his name from possible next statuses
+var newStatusId = getIdForStatusWithName(IN_PROGRESS, possibleActionsList);
+//if new status name is correct
+if (newStatusId == null)
+    exit();
+//get service to work with issue
+var issueService = getComponent("com.atlassian.jira.bc.issue.IssueService");
+//validate changes
+var transitionValidationResult = issueService.validateTransition(
+    user, issue.getId(), newStatusId, issueService.newIssueInputParameters()
+);
+if (!transitionValidationResult.isValid()) {
+    print("On-branch-created script execution:");
+    print("repositoryName =", repositoryName);
+    print("branchName =", branchName);
+    print("Errors during transition:");
+    print(transitionValidationResult.getErrorCollection());
+} else {
+    issueService.transition(user, transitionValidationResult);
 }
