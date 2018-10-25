@@ -55,6 +55,7 @@ function getUser() {
     } else {
         return users.get(0);
     }
+    return null;
 }
 
 //set required statuses names
@@ -70,7 +71,7 @@ var user = getUser();
 //get first issue key present in the branch name
 var issueKey = getIssueKey(branchName);
 
-//validate user
+//validate user and issueKey
 if (issueKey == null && user == null)
     exit();
 var issue = issueManager.getIssueByCurrentKey(issueKey);
