@@ -51,35 +51,36 @@ var issueManager = getComponent("com.atlassian.jira.issue.IssueManager");
 var pullreq = JSON.parse(pullreqJson);
 //get first issue key present in request title
 var issueKey = getIssueKey(pullreq.title);
-if (issueKey !== null) {
-    //find issue by key
-    var issue = issueManager.getIssueByCurrentKey(issueKey);
-    var status = issue.getStatus();
-    // use issue's assignee as user
-    var user = issue.getAssignee();
-     // check that issue has IN_PROGRESS status
-    if (status.getName() === IN_PROGRESS) {
-        var possibleActionsList = getAcceptedNextSteps(workflowManager, issue);
-        //retrieve new status id by his name from possible next statuses
-        var newStatusId = getIdForStatusWithName(DONE, possibleActionsList);
-        //if new status name is correct
-        if (newStatusId) {
-            //get service to work with issue
-            var issueService = getComponent("com.atlassian.jira.bc.issue.IssueService");
-            //validate changes
-            var transitionValidationResult = issueService.validateTransition(
-                user, issue.getId(), newStatusId, issueService.newIssueInputParameters()
-            );
-            if (transitionValidationResult.isValid()) {
-                var transitionResult = issueService.transition(user, transitionValidationResult);
-            } else {
-                print("On-merge-req-updated script execution:");
-                print("repositoryName =", repositoryName);
-                print("sourceBranch =", pullreq.sourceBranch);
-                print("targetBranch =", pullreq.targetBranch);
-                print("Errors during transition:");
-                print(transitionValidationResult.getErrorCollection());
-            }
-        }
-    }
+// check that issueKey is present in title
+if (issueKey == null)
+    exit();
+//find issue by key
+var issue = issueManager.getIssueByCurrentKey(issueKey);
+var status = issue.getStatus();
+// use issue's assignee as user
+var user = issue.getAssignee();
+// check that issue has IN_PROGRESS status
+if (status.getName() !== IN_PROGRESS)
+    exit();
+var possibleActionsList = getAcceptedNextSteps(workflowManager, issue);
+//retrieve new status id by his name from possible next statuses
+var newStatusId = getIdForStatusWithName(DONE, possibleActionsList);
+//if new status name is correct
+if (newStatusId == null)
+    exit();
+//get service to work with issue
+var issueService = getComponent("com.atlassian.jira.bc.issue.IssueService");
+//validate changes
+var transitionValidationResult = issueService.validateTransition(
+    user, issue.getId(), newStatusId, issueService.newIssueInputParameters()
+);
+if (!transitionValidationResult.isValid()) {
+    print("On-merge-req-updated script execution:");
+    print("repositoryName =", repositoryName);
+    print("sourceBranch =", pullreq.sourceBranch);
+    print("targetBranch =", pullreq.targetBranch);
+    print("Errors during transition:");
+    print(transitionValidationResult.getErrorCollection());
+} else {
+    issueService.transition(user, transitionValidationResult);
 }
