@@ -10,8 +10,7 @@
 // https://github.com/BigBrassBand/jira-git-workflow-hooks
 //
 //  Applying
-// Set name of open status in constant OPEN. By default "Open" is used.
-// Set name of needed transition in constant IN_PROGRESS. By default "Start Progress" is used.
+// Set i18n key for appropriate message in constant ERROR_MESSAGE.
 //
 //  Classes passed as parameters by default
 //
@@ -41,7 +40,9 @@
 //
 //  An author name of the commit
 // authorName : java.lang.String
+
 load(__DIR__ + '../utils.js');
+
 //get commit time in millis
 function getCommitTimeInMillis() {
     return (commitTime != null ? commitTime : (new Date()).getTime()) * 1000;
@@ -83,6 +84,7 @@ var worklogService = getComponent("com.atlassian.jira.bc.issue.worklog.WorklogSe
 var i18nResolver = getComponent("com.atlassian.sal.api.message.I18nResolver");
 var Date = Java.type("java.util.Date");
 
+//check that command arguments are present
 if (isCommandArgsPresent() === false) {
     commandResult.addError(i18nResolver.getText(ERROR_MESSAGE, command.getCommandName()));
     exit();
