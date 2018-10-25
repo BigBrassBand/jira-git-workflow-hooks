@@ -1,6 +1,18 @@
 //# sourceURL=time.js
 'use strict';
 
+//  Description
+//
+// Generates a work log entry
+// (the #time command), the work log is generated with the commit time as
+// the finish.
+//
+// https://github.com/BigBrassBand/jira-git-workflow-hooks
+//
+//  Applying
+// Set name of open status in constant OPEN. By default "Open" is used.
+// Set name of needed transition in constant IN_PROGRESS. By default "Start Progress" is used.
+//
 //  Classes passed as parameters by default
 //
 //  The passed smart commit command
@@ -30,68 +42,75 @@
 //  An author name of the commit
 // authorName : java.lang.String
 load(__DIR__ + '../utils.js');
-
-function getCommitTimeInMillis(){
-   return (commitTime != null ? commitTime : (new Date()).getTime()) * 1000;
+//get commit time in millis
+function getCommitTimeInMillis() {
+    return (commitTime != null ? commitTime : (new Date()).getTime()) * 1000;
 }
-
-function isCommandArgsPresent(){
-   return command.getArguments().length > 0 && command.getArguments().get(0).trim().length > 0;
+//check that command args are present
+function isCommandArgsPresent() {
+    return command.getArguments().length > 0 && command.getArguments().get(0).trim().length > 0;
 }
-
-function getWorklogParametersBuilder(){
-   var WorklogParametersImpl = Java.type(
-   "com.atlassian.jira.bc.issue.worklog.WorklogInputParametersImpl"
-   );
-   return new WorklogParametersImpl.Builder();
+//get builder for worklog parameters
+function getWorklogParametersBuilder() {
+    var WorklogParametersImpl = Java.type(
+        "com.atlassian.jira.bc.issue.worklog.WorklogInputParametersImpl"
+    );
+    return new WorklogParametersImpl.Builder();
 }
-
-function getDurationAndCommentFromArgs(){
-   var worklog = command.getArguments().get(0);
-   var JiraWorklogUtil = Java.type("com.atlassian.jira.plugins.dvcs.smartcommits.JiraWorklogUtil");
-   return JiraWorklogUtil.splitWorklogToDurationAndComment(worklog);
+//get duration and comment from input args
+function getDurationAndCommentFromArgs() {
+    var worklog = command.getArguments().get(0);
+    var JiraWorklogUtil = Java.type("com.atlassian.jira.plugins.dvcs.smartcommits.JiraWorklogUtil");
+    return JiraWorklogUtil.splitWorklogToDurationAndComment(worklog);
 }
-
-function getDurationInMillis(durationString){
+//get duration in millis
+function getDurationInMillis(durationString) {
     var PeriodFormatterBuilder = Java.type("org.joda.time.format.PeriodFormatterBuilder");
     var formatter = new PeriodFormatterBuilder()
-         .appendWeeks().appendSuffix("w ")
-         .appendDays().appendSuffix("d ")
-         .appendHours().appendSuffix("h ")
-         .appendMinutes().appendSuffix("m")
-         .toFormatter();
+        .appendWeeks().appendSuffix("w ")
+        .appendDays().appendSuffix("d ")
+        .appendHours().appendSuffix("h ")
+        .appendMinutes().appendSuffix("m")
+        .toFormatter();
     return formatter.parsePeriod(durationString).toStandardDuration().getMillis();
 }
-
+// i18n key for error message
 var ERROR_MESSAGE = "git.repository.smartcommits.error.exception-during-command-processing";
 
+//get needed components to execute main logic
 var JiraServiceContextImpl = Java.type("com.atlassian.jira.bc.JiraServiceContextImpl");
 var worklogService = getComponent("com.atlassian.jira.bc.issue.worklog.WorklogService");
 var i18nResolver = getComponent("com.atlassian.sal.api.message.I18nResolver");
 var Date = Java.type("java.util.Date");
 
-if(isCommandArgsPresent()) {
-    var jiraContext = new JiraServiceContextImpl(user);
-    var durationAndComment = getDurationAndCommentFromArgs();
-    var worklogParametersBuilder = getWorklogParametersBuilder();
-    var durationTime = getDurationInMillis(durationAndComment.duration);
-    var finishTime = getCommitTimeInMillis();
-    var worklogParameters = worklogParametersBuilder.issue(issue)
-        .timeSpent(durationAndComment.duration)
-        .comment(durationAndComment.comment)
-        .startDate(new Date(finishTime - durationTime)).build();
-    var result = worklogService.validateCreate(jiraContext, worklogParameters);
-    if (!jiraContext.getErrorCollection().hasAnyErrors()) {
-        worklogService.createAndAutoAdjustRemainingEstimate(jiraContext, result, true);
-    } else {
-        // Report errors if any
-        for each (var err in jiraServiceContext.getErrorCollection().getErrors()) {
-            commandResult.addError(err);
-        }
-        for each (var err in jiraServiceContext.getErrorCollection().getErrorMessages()) {
-            commandResult.addError(err);
-        }
+if (isCommandArgsPresent() === false) {
+    commandResult.addError(i18nResolver.getText(ERROR_MESSAGE, command.getCommandName()));
+    exit();
+}
+//get Jira context
+var jiraContext = new JiraServiceContextImpl(user);
+//get duration and comment from input params
+var durationAndComment = getDurationAndCommentFromArgs();
+//get worklog params builder
+var worklogParametersBuilder = getWorklogParametersBuilder();
+//convert time params in milliseconds
+var durationTime = getDurationInMillis(durationAndComment.duration);
+var finishTime = getCommitTimeInMillis();
+//create worklog params
+var worklogParameters = worklogParametersBuilder.issue(issue)
+    .timeSpent(durationAndComment.duration)
+    .comment(durationAndComment.comment)
+    .startDate(new Date(finishTime - durationTime)).build();
+//validate changes
+var result = worklogService.validateCreate(jiraContext, worklogParameters);
+if (jiraContext.getErrorCollection().hasAnyErrors()) {
+    // Report errors if any
+    for each(var err in jiraServiceContext.getErrorCollection().getErrors()) {
+        commandResult.addError(err);
+    }
+    for each(var err in jiraServiceContext.getErrorCollection().getErrorMessages()) {
+        commandResult.addError(err);
     }
 } else {
-     commandResult.addError(i18nResolver.getText(ERROR_MESSAGE, command.getCommandName()));
+    worklogService.createAndAutoAdjustRemainingEstimate(jiraContext, result, true);
 }
