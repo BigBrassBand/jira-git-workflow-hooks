@@ -7,6 +7,8 @@
 // It works in suggestion that issue key is present in the title of merge request.
 // First issue's key from merge/pull request title will be taken as issue for transition.
 // Issue's status will be changed on behalf of issue's assignee.
+// Take into account that Fix version retains empty.
+//
 // https://github.com/BigBrassBand/jira-git-workflow-hooks
 //
 //  Applying
