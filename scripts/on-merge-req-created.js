@@ -3,11 +3,11 @@
 
 //  Description
 //
-// This script work as a handler that checks if an issue is in open status.
-// If it is, then automatically transition to in progress.
-// It works in suggestion that issue key is present in the title of merge request.
-// First issue's key from merge/pull request title will be taken as issue for transition.
-// Issue's status will be changed on behalf of issue's assignee.
+// This script does an automatic issue transition to "In progress" status if
+// the issue is still in "Open" status when a merge/pull request has been created for the issue.
+// It works on the assumption that an issue key is present in the title of the merge/pull request.
+// First issue's key from the merge/pull request title will be taken as an issue for the transition.
+// Issue's status will be changed on behalf of the issue's assignee.
 // https://github.com/BigBrassBand/jira-git-workflow-hooks
 //
 //  Applying
@@ -53,6 +53,7 @@ var issueKey = getIssueKey(pullreq.title);
 //check that issue key is present
 if (issueKey == null)
     exit();
+
 //find issue by key
 var issue = issueManager.getIssueByCurrentKey(issueKey);
 var status = issue.getStatus();
@@ -61,12 +62,14 @@ var user = issue.getAssignee();
 // check that issue has OPEN status
 if (status.getName() !== OPEN)
     exit();
+
 var possibleActionsList = getAcceptedNextSteps(workflowManager, issue);
 //retrieve new status id by his name from possible next statuses
 var newStatusId = getIdForStatusWithName(IN_PROGRESS, possibleActionsList);
 //if new status name is correct
 if (newStatusId == null)
     exit();
+
 //get service to work with issue
 var issueService = getComponent("com.atlassian.jira.bc.issue.IssueService");
 //validate changes
