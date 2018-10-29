@@ -3,11 +3,12 @@
 
 //  Description
 //
-// This script work as a handler that checks if an issue is in open status.
-// If it is, then automatically transition to in progress.
-// It works in suggestion that issue key is present in the branch name.
-// First issue's key from the branch name will be taken as issue for transition.
-// Issue's status will be changed on behalf of author of commit.
+// This script does an automatic issue transition to "In progress" status if
+// the issue is still in "Open" status when a commit has been created for the issue.
+// It works on the assumption that an issue key is present in the comment of commit.
+// First issue's key from the comment of commit will be taken as an issue for the transition.
+// Issue's status will be changed on behalf of the issue's assignee.
+//
 // https://github.com/BigBrassBand/jira-git-workflow-hooks
 //
 //  Applying
@@ -66,31 +67,33 @@ var OPEN = "Open";
 var workflowManager = getComponent("com.atlassian.jira.workflow.WorkflowManager");
 var issueManager = getComponent("com.atlassian.jira.issue.IssueManager");
 var issueService = getComponent("com.atlassian.jira.bc.issue.IssueService");
-
-var user = getUser();
-//get first issue key present in the branch name
-var issueKey = getIssueKey(branchName);
-
-//validate user and issueKey
-if (issueKey == null && user == null)
+//check that issue key is present in the commit comment
+if(!commitProperties.issueCommit)
     exit();
+
+//get first issue key present in the commit comment
+var issueKey = getIssueKey(commitComment);
+var user = getUser();
+//validate user and issueKey
+if (issueKey == null || user == null)
+    exit();
+
 var issue = issueManager.getIssueByCurrentKey(issueKey);
 var status = issue.getStatus();
-
 //check status name
 if (status.getName() !== OPEN)
     exit();
+
 var possibleActionsList = getAcceptedNextSteps(workflowManager, issue);
 var newStatusId = getIdForStatusWithName(IN_PROGRESS, possibleActionsList);
-
 //check new status name
 if (newStatusId == null)
     exit();
+
 //validate transition
 var transitionValidationResult = issueService.validateTransition(
     user, issue.getId(), newStatusId, issueService.newIssueInputParameters()
 );
-
 if (!transitionValidationResult.isValid()) {
     print("On-commit script execution:");
     print("branchName =", branchName);
