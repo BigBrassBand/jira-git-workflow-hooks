@@ -66,14 +66,9 @@ function getDurationAndCommentFromArgs() {
 }
 //get duration in millis
 function getDurationInMillis(durationString) {
-    var PeriodFormatterBuilder = Java.type("org.joda.time.format.PeriodFormatterBuilder");
-    var formatter = new PeriodFormatterBuilder()
-        .appendWeeks().appendSuffix("w ")
-        .appendDays().appendSuffix("d ")
-        .appendHours().appendSuffix("h ")
-        .appendMinutes().appendSuffix("m")
-        .toFormatter();
-    return formatter.parsePeriod(durationString).toStandardDuration().getMillis();
+    var jiraDateUtil = getComponent("com.atlassian.core.util.DateUtils");
+    var duration = jiraUtil.getDuration(durationString) * 1000;
+    return duration;
 }
 // i18n key for error message
 var ERROR_MESSAGE = "git.repository.smartcommits.error.exception-during-command-processing";
@@ -89,6 +84,7 @@ if (isCommandArgsPresent() === false) {
     commandResult.addError(i18nResolver.getText(ERROR_MESSAGE, command.getCommandName()));
     exit();
 }
+
 //get Jira context
 var jiraContext = new JiraServiceContextImpl(user);
 //get duration and comment from input params
