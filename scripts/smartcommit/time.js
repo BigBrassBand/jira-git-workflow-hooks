@@ -103,10 +103,10 @@ var worklogParameters = worklogParametersBuilder.issue(issue)
 var result = worklogService.validateCreate(jiraContext, worklogParameters);
 if (jiraContext.getErrorCollection().hasAnyErrors()) {
     // Report errors if any
-    for each(var err in jiraServiceContext.getErrorCollection().getErrors()) {
+    for each(var err in jiraContext.getErrorCollection().getErrors()) {
         commandResult.addError(err);
     }
-    for each(var err in jiraServiceContext.getErrorCollection().getErrorMessages()) {
+    for each(var err in jiraContext.getErrorCollection().getErrorMessages()) {
         commandResult.addError(err);
     }
 } else {
