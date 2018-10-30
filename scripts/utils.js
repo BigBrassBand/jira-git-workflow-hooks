@@ -32,6 +32,13 @@ function getIdForStatusWithName(statusName, possibleActionsList) {
     return null;
 }
 
+//get component by component full name
+function getComponent(componentName) {
+    var componentAccessor = Java.type("com.atlassian.jira.component.ComponentAccessor");
+    var clazz = Java.type("java.lang.Class")
+    return componentAccessor.getOSGiComponentInstanceOfType(clazz.forName(componentName));
+}
+
 //form error message
 function formError(issue, i18nHelper, commandName, templateName) {
 
@@ -44,11 +51,4 @@ function formError(issue, i18nHelper, commandName, templateName) {
     return errorHandler.fromSingleError(
         commandName, issue.getKey(), i18nHelper.getText(templateName, issue.getKey(), getIssueState(issue))
     )
-}
-
-//get component by component full name
-function getComponent(componentName) {
-    var componentAccessor = Java.type("com.atlassian.jira.component.ComponentAccessor");
-    var clazz = Java.type("java.lang.Class")
-    return componentAccessor.getOSGiComponentInstanceOfType(clazz.forName(componentName));
 }
