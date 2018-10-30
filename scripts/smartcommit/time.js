@@ -45,7 +45,7 @@ load(__DIR__ + '../utils.js');
 
 //get commit time in millis
 function getCommitTimeInMillis() {
-    return (commitTime != null ? commitTime : (new Date()).getTime()) * 1000;
+    return (commitTime != null ? commitTime : (new Date()).getTime()) * TO_MILLIS;
 }
 //check that command args are present
 function isCommandArgsPresent() {
@@ -66,10 +66,12 @@ function getDurationAndCommentFromArgs() {
 }
 //get duration in millis
 function getDurationInMillis(durationString) {
-    var jiraDateUtil = getComponent("com.atlassian.core.util.DateUtils");
-    var duration = jiraUtil.getDuration(durationString) * 1000;
+    var jiraDateUtil = Java.type("com.atlassian.core.util.DateUtils");
+    var duration = jiraDateUtil.getDuration(durationString) * TO_MILLIS;
     return duration;
 }
+//multiplier for conversion from seconds to milliseconds
+var TO_MILLIS = 1000;
 // i18n key for error message
 var ERROR_MESSAGE = "git.repository.smartcommits.error.exception-during-command-processing";
 
