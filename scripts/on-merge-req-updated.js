@@ -40,59 +40,60 @@
 //
 // Origin of the repository (http/git URL for remote repositories or just a folder path for tracked repositories). It is empty for hosted repositories.
 // repositoryOrigin : java.lang.String
+(function () {
+    load(__DIR__ + 'utils.js');
 
-load(__DIR__ + 'utils.js');
+    //set required statuses names
+    var IN_PROGRESS = "In Progress";
+    var DONE = "Resolve Issue";
+    var REQUEST_STATE = "merged";
 
-//set required statuses names
-var IN_PROGRESS = "In Progress";
-var DONE = "Resolve Issue";
-var REQUEST_STATE = "merged";
+    //get needed components to execute main logic
+    var workflowManager = getComponent("com.atlassian.jira.workflow.WorkflowManager");
+    var issueManager = getComponent("com.atlassian.jira.issue.IssueManager");
 
-//get needed components to execute main logic
-var workflowManager = getComponent("com.atlassian.jira.workflow.WorkflowManager");
-var issueManager = getComponent("com.atlassian.jira.issue.IssueManager");
+    //extract input data from JSON to object
+    var pullreq = JSON.parse(pullreqJson);
+    //get first issue key present in request title
+    var issueKey = getIssueKey(pullreq.title);
+    // check that issueKey is present in title
+    if (issueKey == null)
+        return;
 
-//extract input data from JSON to object
-var pullreq = JSON.parse(pullreqJson);
-//get first issue key present in request title
-var issueKey = getIssueKey(pullreq.title);
-// check that issueKey is present in title
-if (issueKey == null)
-    exit();
+    //find issue by key
+    var issue = issueManager.getIssueByCurrentKey(issueKey);
+    var status = issue.getStatus();
+    // use issue's assignee as user
+    var user = issue.getAssignee();
+    // check that issue has IN_PROGRESS status
+    if (status.getName() !== IN_PROGRESS)
+        return;
 
-//find issue by key
-var issue = issueManager.getIssueByCurrentKey(issueKey);
-var status = issue.getStatus();
-// use issue's assignee as user
-var user = issue.getAssignee();
-// check that issue has IN_PROGRESS status
-if (status.getName() !== IN_PROGRESS)
-    exit();
+    // check that request has state REQUEST_STATE
+    if (pullreq.requestState !== REQUEST_STATE)
+        return;
 
-// check that request has state REQUEST_STATE
-if (pullreq.requestState !== REQUEST_STATE)
-    exit();
+    var possibleActionsList = getAcceptedNextSteps(workflowManager, issue);
+    //retrieve new status id by his name from possible next statuses
+    var newStatusId = getIdForStatusWithName(DONE, possibleActionsList);
+    //if new status name is correct
+    if (newStatusId == null)
+        return;
 
-var possibleActionsList = getAcceptedNextSteps(workflowManager, issue);
-//retrieve new status id by his name from possible next statuses
-var newStatusId = getIdForStatusWithName(DONE, possibleActionsList);
-//if new status name is correct
-if (newStatusId == null)
-    exit();
-
-//get service to work with issue
-var issueService = getComponent("com.atlassian.jira.bc.issue.IssueService");
-//validate changes
-var transitionValidationResult = issueService.validateTransition(
-    user, issue.getId(), newStatusId, issueService.newIssueInputParameters()
-);
-if (!transitionValidationResult.isValid()) {
-    print("On-merge-req-updated script execution:");
-    print("repositoryName =", repositoryName);
-    print("sourceBranch =", pullreq.sourceBranch);
-    print("targetBranch =", pullreq.targetBranch);
-    print("Errors during transition:");
-    print(transitionValidationResult.getErrorCollection());
-} else {
-    issueService.transition(user, transitionValidationResult);
-}
+    //get service to work with issue
+    var issueService = getComponent("com.atlassian.jira.bc.issue.IssueService");
+    //validate changes
+    var transitionValidationResult = issueService.validateTransition(
+        user, issue.getId(), newStatusId, issueService.newIssueInputParameters()
+    );
+    if (!transitionValidationResult.isValid()) {
+        print("On-merge-req-updated script execution:");
+        print("repositoryName =", repositoryName);
+        print("sourceBranch =", pullreq.sourceBranch);
+        print("targetBranch =", pullreq.targetBranch);
+        print("Errors during transition:");
+        print(transitionValidationResult.getErrorCollection());
+    } else {
+        issueService.transition(user, transitionValidationResult);
+    }
+})();
