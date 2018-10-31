@@ -41,66 +41,69 @@
 //   issueCommit         -- true if the commit has issue keys in its comment message.
 //   newForRepoAndCommit -- true if the commit is seen for the first time for this repository. It seems it is always true.
 //   initialIndex        -- true if the script is called during an initial repository reindex. It seems it is always false.
+(function () {
+    load(__DIR__ + 'utils.js');
 
-load(__DIR__ + 'utils.js');
+    //get user by authorEmail, authorName
+    function getUser() {
+        var crowdService = getComponent(
+            "com.atlassian.jira.plugins.dvcs.smartcommits.GitPluginCompatibilityCrowdService"
+        );
+        var users = crowdService.getUserByEmailOrNull(authorEmail, authorName);
 
-//get user by authorEmail, authorName
-function getUser() {
-    var crowdService = getComponent("com.atlassian.jira.plugins.dvcs.smartcommits.GitPluginCompatibilityCrowdService");
-    var users = crowdService.getUserByEmailOrNull(authorEmail, authorName);
-
-    if (users.isEmpty()) {
-        print("Unknown Jira user");
-    } else if (users.size() > 1) {
-        print("Ambiguous jira user");
-    } else {
-        return users.get(0);
+        if (users.isEmpty()) {
+            print("Unknown Jira user");
+        } else if (users.size() > 1) {
+            print("Ambiguous jira user");
+        } else {
+            return users.get(0);
+        }
+        return null;
     }
-    return null;
-}
 
-//set required statuses names
-var IN_PROGRESS = "Start Progress";
-var OPEN = "Open";
+    //set required statuses names
+    var IN_PROGRESS = "Start Progress";
+    var OPEN = "Open";
 
-//get needed components to execute main logic
-var workflowManager = getComponent("com.atlassian.jira.workflow.WorkflowManager");
-var issueManager = getComponent("com.atlassian.jira.issue.IssueManager");
-var issueService = getComponent("com.atlassian.jira.bc.issue.IssueService");
-//check that issue key is present in the commit comment
-if(!commitProperties.issueCommit)
-    exit();
+    //get needed components to execute main logic
+    var workflowManager = getComponent("com.atlassian.jira.workflow.WorkflowManager");
+    var issueManager = getComponent("com.atlassian.jira.issue.IssueManager");
+    var issueService = getComponent("com.atlassian.jira.bc.issue.IssueService");
+    //check that issue key is present in the commit comment
+    if (!commitProperties.issueCommit)
+        return;
 
-//get first issue key present in the commit comment
-var issueKey = getIssueKey(commitComment);
-var user = getUser();
-//validate user and issueKey
-if (issueKey == null || user == null)
-    exit();
+    //get first issue key present in the commit comment
+    var issueKey = getIssueKey(commitComment);
+    var user = getUser();
+    //validate user and issueKey
+    if (issueKey == null || user == null)
+        return;
 
-var issue = issueManager.getIssueByCurrentKey(issueKey);
-var status = issue.getStatus();
-//check status name
-if (status.getName() !== OPEN)
-    exit();
+    var issue = issueManager.getIssueByCurrentKey(issueKey);
+    var status = issue.getStatus();
+    //check status name
+    if (status.getName() !== OPEN)
+        return;
 
-var possibleActionsList = getAcceptedNextSteps(workflowManager, issue);
-var newStatusId = getIdForStatusWithName(IN_PROGRESS, possibleActionsList);
-//check new status name
-if (newStatusId == null)
-    exit();
+    var possibleActionsList = getAcceptedNextSteps(workflowManager, issue);
+    var newStatusId = getIdForStatusWithName(IN_PROGRESS, possibleActionsList);
+    //check new status name
+    if (newStatusId == null)
+        return;
 
-//validate transition
-var transitionValidationResult = issueService.validateTransition(
-    user, issue.getId(), newStatusId, issueService.newIssueInputParameters()
-);
-if (!transitionValidationResult.isValid()) {
-    print("On-commit script execution:");
-    print("branchName =", branchName);
-    print("revision =", revision);
-    print("Errors during transition:");
-    print(transitionValidationResult.getErrorCollection());
-} else {
-    // do transition
-    issueService.transition(user, transitionValidationResult);
-}
+    //validate transition
+    var transitionValidationResult = issueService.validateTransition(
+        user, issue.getId(), newStatusId, issueService.newIssueInputParameters()
+    );
+    if (!transitionValidationResult.isValid()) {
+        print("On-commit script execution:");
+        print("branchName =", branchName);
+        print("revision =", revision);
+        print("Errors during transition:");
+        print(transitionValidationResult.getErrorCollection());
+    } else {
+        // do transition
+        issueService.transition(user, transitionValidationResult);
+    }
+})();
