@@ -35,6 +35,7 @@
 //    setResultCode(com.bigbrassband.jira.git.services.scripting.UserResolutionResult.ResultCode resultCode) -- USER_FOUND, USE_STANDARD_SEARCH, ERROR
 //    setErrorMessage(java.lang.String errorMessage)
 
+load(__DIR__ + 'utils.js');
 //set name of smart commits' user
 var SMARTCOMMIT_USER_NAME = "smartcommituser";
 
