@@ -6,6 +6,7 @@
 // This script work as a handler that sets version when transitioning to done.
 // Version should be present in version input argument.
 // Command should look like #done version=2.0.
+// Please take into account that resolution of issue remains empty after transition.
 // https://github.com/BigBrassBand/jira-git-workflow-hooks
 //
 //  Applying
