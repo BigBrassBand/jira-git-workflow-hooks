@@ -61,5 +61,5 @@ function formError(issue, i18nHelper, commandName, templateName) {
     var errorHandler = Java.type("com.atlassian.jira.plugins.dvcs.smartcommits.model.CommitHookHandlerError");
     return errorHandler.fromSingleError(
         commandName, issue.getKey(), i18nHelper.getText(templateName, issue.getKey(), getIssueState(issue))
-    )
+    );
 }
