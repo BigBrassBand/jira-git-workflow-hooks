@@ -35,56 +35,57 @@
 //
 // Origin of the repository (http/git URL for remote repositories or just a folder path for tracked repositories). It is empty for hosted repositories.
 // repositoryOrigin : java.lang.String
+(function () {
+    load(__DIR__ + 'utils.js');
 
-load(__DIR__ + 'utils.js');
+    //set required statuses names
+    var IN_PROGRESS = "Start Progress";
+    var OPEN = "Open";
 
-//set required statuses names
-var IN_PROGRESS = "Start Progress";
-var OPEN = "Open";
+    //get needed components to execute main logic
+    var workflowManager = getComponent("com.atlassian.jira.workflow.WorkflowManager");
+    var issueManager = getComponent("com.atlassian.jira.issue.IssueManager");
 
-//get needed components to execute main logic
-var workflowManager = getComponent("com.atlassian.jira.workflow.WorkflowManager");
-var issueManager = getComponent("com.atlassian.jira.issue.IssueManager");
+    //extract input data from JSON to object
+    var pullreq = JSON.parse(pullreqJson);
+    //get first issue key present in request title
+    var issueKey = getIssueKey(pullreq.title);
+    //check that issue key is present
+    if (issueKey == null)
+        return;
 
-//extract input data from JSON to object
-var pullreq = JSON.parse(pullreqJson);
-//get first issue key present in request title
-var issueKey = getIssueKey(pullreq.title);
-//check that issue key is present
-if (issueKey == null)
-    exit();
+    //find issue by key
+    var issue = issueManager.getIssueByCurrentKey(issueKey);
+    var status = issue.getStatus();
+    // use issue's assignee as user
+    var user = issue.getAssignee();
+    // check that issue has OPEN status
+    if (status.getName() !== OPEN)
+        return;
 
-//find issue by key
-var issue = issueManager.getIssueByCurrentKey(issueKey);
-var status = issue.getStatus();
-// use issue's assignee as user
-var user = issue.getAssignee();
-// check that issue has OPEN status
-if (status.getName() !== OPEN)
-    exit();
+    var possibleActionsList = getAcceptedNextSteps(workflowManager, issue);
+    //retrieve new status id by his name from possible next statuses
+    var newStatusId = getIdForStatusWithName(IN_PROGRESS, possibleActionsList);
+    //if new status name is correct
+    if (newStatusId == null)
+        return;
 
-var possibleActionsList = getAcceptedNextSteps(workflowManager, issue);
-//retrieve new status id by his name from possible next statuses
-var newStatusId = getIdForStatusWithName(IN_PROGRESS, possibleActionsList);
-//if new status name is correct
-if (newStatusId == null)
-    exit();
-
-//get service to work with issue
-var issueService = getComponent("com.atlassian.jira.bc.issue.IssueService");
-//validate changes
-var transitionValidationResult = issueService.validateTransition(
-    user, issue.getId(), newStatusId, issueService.newIssueInputParameters()
-);
-//handle errors
-if (!transitionValidationResult.isValid()) {
-    print("On-merge-req-created script execution:");
-    print("repositoryName =", repositoryName);
-    print("sourceBranch =", pullreq.sourceBranch);
-    print("targetBranch =", pullreq.targetBranch);
-    print("Errors during transition:");
-    print(transitionValidationResult.getErrorCollection());
-} else {
-    //do transition
-    issueService.transition(user, transitionValidationResult);
-}
+    //get service to work with issue
+    var issueService = getComponent("com.atlassian.jira.bc.issue.IssueService");
+    //validate changes
+    var transitionValidationResult = issueService.validateTransition(
+        user, issue.getId(), newStatusId, issueService.newIssueInputParameters()
+    );
+    //handle errors
+    if (!transitionValidationResult.isValid()) {
+        print("On-merge-req-created script execution:");
+        print("repositoryName =", repositoryName);
+        print("sourceBranch =", pullreq.sourceBranch);
+        print("targetBranch =", pullreq.targetBranch);
+        print("Errors during transition:");
+        print(transitionValidationResult.getErrorCollection());
+    } else {
+        //do transition
+        issueService.transition(user, transitionValidationResult);
+    }
+})();
