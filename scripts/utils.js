@@ -38,3 +38,17 @@ function getComponent(componentName) {
     var clazz = Java.type("java.lang.Class")
     return componentAccessor.getOSGiComponentInstanceOfType(clazz.forName(componentName));
 }
+
+//form error message
+function formError(issue, i18nHelper, commandName, templateName) {
+
+    function getIssueState(issue, i18nHelper) {
+        var s = issue.getStatusObject();
+        return s == null ? i18nHelper.getText(NO_STATUS) : s.getName();
+    };
+
+    var errorHandler = Java.type("com.atlassian.jira.plugins.dvcs.smartcommits.model.CommitHookHandlerError");
+    return errorHandler.fromSingleError(
+        commandName, issue.getKey(), i18nHelper.getText(templateName, issue.getKey(), getIssueState(issue))
+    );
+}
