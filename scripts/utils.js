@@ -32,6 +32,17 @@ function getIdForStatusWithName(statusName, possibleActionsList) {
     return null;
 }
 
+//find status id by statusName among possibleActionsList
+function getIdForStatusWithNameIgnoreCase(statusName, possibleActionsList) {
+    var actionId = 0;
+    for each (var actionDescriptor in possibleActionsList) {
+       	if(actionDescriptor.getName().toLowerCase() === statusName) {
+       	    return actionDescriptor.getId();
+       	}
+    }
+    return null;
+}
+
 //get component by component full name
 function getComponent(componentName) {
     var componentAccessor = Java.type("com.atlassian.jira.component.ComponentAccessor");
