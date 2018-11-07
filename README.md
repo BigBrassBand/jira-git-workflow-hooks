@@ -1,7 +1,7 @@
 # jira-git-workflow-hooks
 Git Integration for Jira JavaScript Hooks
 
-https://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/on-branch-created.js
+# https://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/on-branch-created.js
   Description
 
   This script does an automatic issue transition to "In progress" status if
@@ -15,7 +15,7 @@ https://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/on-b
   Set name of open status in constant OPEN. By default "Open" is used.
   Set name of needed transition in constant IN_PROGRESS. By default "Start Progress" is used.
 
-https://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/on-commit.js
+# https://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/on-commit.js
   Description
 
   This script does an automatic issue transition to "In progress" status if
