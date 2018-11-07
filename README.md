@@ -75,6 +75,7 @@ Git Integration for Jira JavaScript Hooks
   Set name of smart commit user in constant SMARTCOMMIT_USER_NAME. By default "smartcommituser" is used.
 
 * [time script](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/smartcommit/time.js)
+  
   Description
 
   Generates a work log entry(the #time command), the work log is generated with the commit time as
@@ -85,6 +86,7 @@ Git Integration for Jira JavaScript Hooks
   Set i18n key for appropriate message in constant ERROR_MESSAGE.
 
 * [utils script](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/utils.js)
+  
   Description
 
   Utility script used in most of other scripts.
@@ -92,8 +94,12 @@ Git Integration for Jira JavaScript Hooks
   Applying
 
   Add row below for regular scripts.
+  ```javascript
   load(__DIR__ + 'utils.js');
+  ```
 
   Add row below for smart commits scripts.
+  ```javascript
   load(__DIR__ + '../utils.js');
+  ```
 
