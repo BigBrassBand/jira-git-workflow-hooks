@@ -102,9 +102,6 @@
         return;
     }
 
-    //If you want to overwrite all existing versions with a new one -- please uncomment the line below
-    //issue.getFixVersions().clear();
-
     // create new issue input parameters
     var issueInputParameters = issueService.newIssueInputParameters();
     //set new version
