@@ -1,9 +1,9 @@
 # jira-git-workflow-hooks
 Git Integration for Jira JavaScript Hooks
 
-* [on-branch-created script](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/on-branch-created.js)
+* [**on-branch-created script**](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/on-branch-created.js)
   
-  Description
+  **Description**
 
   This script does an automatic issue transition to "In progress" status if
   the issue is still in "Open" status when a branch has been created for the issue.
@@ -11,14 +11,14 @@ Git Integration for Jira JavaScript Hooks
   First issue's key from the created branch name will be taken as an issue for the transition.
   Issue's status will be changed on behalf of the issue's assignee.
 
-  Applying
+  **Applying**
 
   Set name of open status in constant OPEN. By default "Open" is used.
   Set name of needed transition in constant IN_PROGRESS. By default "Start Progress" is used.
 
-* [on-commit script](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/on-commit.js)
+* [**on-commit script**](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/on-commit.js)
 
-  Description
+  **Description**
 
   This script does an automatic issue transition to "In progress" status if
   the issue is still in "Open" status when a commit has been created for the issue.
@@ -26,14 +26,14 @@ Git Integration for Jira JavaScript Hooks
   First issue's key from the comment of commit will be taken as an issue for the transition.
   Issue's status will be changed on behalf of the issue's assignee.
 
-  Applying
+  **Applying**
 
   Set name of open status in constant OPEN. By default "Open" is used.
   Set name of needed transition in constant IN_PROGRESS. By default "Start Progress" is used.
 
-* [on-merge-req-created script](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/on-merge-req-created.js)
+* [**on-merge-req-created script**](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/on-merge-req-created.js)
   
-  Description
+  **Description**
 
   This script does an automatic issue transition to "In progress" status if
   the issue is still in "Open" status when a merge/pull request has been created for the issue.
@@ -41,14 +41,14 @@ Git Integration for Jira JavaScript Hooks
   First issue's key from the merge/pull request title will be taken as an issue for the transition.
   Issue's status will be changed on behalf of the issue's assignee.
 
-  Applying
+  **Applying**
 
   Set name of open status in constant OPEN. By default "Open" is used.
   Set name of needed transition in constant IN_PROGRESS. By default "Start Progress" is used.
 
-* [on-merge-req-updated script](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/on-merge-req-updated.js)
+* [**on-merge-req-updated script**](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/on-merge-req-updated.js)
   
-  Description
+  **Description**
 
   This script does an automatic issue transition to "Done" status if
   the issue is still in "In progress" status when a merge/pull request has been updated for the issue.
@@ -57,41 +57,41 @@ Git Integration for Jira JavaScript Hooks
   Issue's status will be changed on behalf of the issue's assignee.
   Please take into account that 'Fix version' field remains empty.
 
-  Applying
+  **Applying**
 
   Set name of in progress status in constant IN_PROGRESS. By default "In Progress" is used.
   Set name of needed transition in constant DONE. By default "Resolve Issue" is used.
   Set name of needed request state in constant REQUEST_STATE. By default "merged" is used.
 
-* [on-user-resolution script](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/on-user-resolution.js)
+* [**on-user-resolution script**](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/on-user-resolution.js)
   
-  Description
+  **Description**
 
   This script work as a handler that force all commits to be processed by a Jira user called smartcommituser.
   If smartcommituser is unavailable, then return an error.
 
-  Applying
+  **Applying**
 
   Set name of smart commit user in constant SMARTCOMMIT_USER_NAME. By default "smartcommituser" is used.
 
-* [time script](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/smartcommit/time.js)
+* [**time script**](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/smartcommit/time.js)
   
-  Description
+  **Description**
 
   Generates a work log entry(the #time command), the work log is generated with the commit time as
   the finish.
 
-  Applying
+  **Applying**
 
   Set i18n key for appropriate message in constant ERROR_MESSAGE.
 
-* [utils script](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/utils.js)
+* [**utils script**](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/utils.js)
   
-  Description
+  **Description**
 
   Utility script used in most of other scripts.
 
-  Applying
+  **Applying**
 
   Add row below for regular scripts.
   ```javascript
