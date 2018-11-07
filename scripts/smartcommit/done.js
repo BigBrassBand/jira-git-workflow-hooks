@@ -47,7 +47,7 @@
     //get version param from input params
     function getVersionParam() {
         if (command.getArguments().length > 0 && command.getArguments().get(0).trim().length > 0) {
-            var regexp = /version=((\d|.)+)/;
+            var regexp = /version=([\w.-]+)/;
             var result = regexp.exec(command.getArguments().get(0).trim());
             if (result && result.length > 1) {
                 return result[1];
@@ -102,8 +102,9 @@
         return;
     }
 
-    //clear issue current version
-    issue.getFixVersions().clear();
+    //If you want to overwrite all existing versions with a new one -- please uncomment the line below
+    //issue.getFixVersions().clear();
+
     // create new issue input parameters
     var issueInputParameters = issueService.newIssueInputParameters();
     //set new version
