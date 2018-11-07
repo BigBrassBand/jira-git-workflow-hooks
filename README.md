@@ -73,6 +73,18 @@ Git Integration for Jira JavaScript Hooks
   **Applying**
 
   Set name of smart commit user in constant SMARTCOMMIT_USER_NAME. By default "smartcommituser" is used.
+  
+* [**associate-by-branch**](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/associate-by-branch.js)
+
+  **Description**
+  
+  This script auto associates the commit to the issue key listed in the branch name.
+  It works on the assumption that an issue key is not present in the comment of commit.
+  First issue's key from the branch name will be taken as an issue for the association.
+  
+  **Applying**
+  
+  Rename script in on-commit.js script and put in scripts folder.
 
 * [**time script**](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/smartcommit/time.js)
   
@@ -84,7 +96,22 @@ Git Integration for Jira JavaScript Hooks
   **Applying**
 
   Set i18n key for appropriate message in constant ERROR_MESSAGE.
+  
+* [**done script**](https://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/smartcommit/done.js)
+  
+  **Description**
 
+  This script work as a handler that sets version when transitioning to done.
+  Version should be present in version input argument.
+  Command should look like #done version=2.0.
+  Please take into account that:
+  issue will have only one version and resolution remains empty after transition.
+
+  **Applying**
+
+  Set appropriate keys for error messages in constants: NO_STATUS, NO_ALLOWED_ACTIONS_TEMPLATE, UNKNOWN_VERSION.
+  Command name will be used as transition name.
+  
 * [**utils script**](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/utils.js)
   
   **Description**
