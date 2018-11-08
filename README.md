@@ -1,6 +1,8 @@
 # jira-git-workflow-hooks
 Git Integration for Jira JavaScript Hooks
 
+# Scripts description
+
 * [**on-branch-created script**](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/on-branch-created.js)
   
   **Description**
@@ -129,4 +131,16 @@ Git Integration for Jira JavaScript Hooks
   ```javascript
   load(__DIR__ + '../utils.js');
   ```
+# Script debugging
+  
+It is possible to connect Nashorn debugger to Jira and debug scripts which is run through the script service. 
+To achieve it please do the next:
+  * Build NCDbg. Sources can be found [here](https://github.com/provegard/ncdbg).
+  * Jira should be run with enabled debugger, i.e. the next arguments should be passed:
+    -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=localhost:<port>
+    atlas-debug command can be used as already has debugger enabled.
+  * Run ncdbg using the next command line: bin/ncdbg -c localhost:<port>
+    Default Jira port 5005 can be used in case of using atlas-debug command.
+  * Download Visual Studio Code from [here](https://code.visualstudio.com/)
+  * Next steps are described [here](https://github.com/provegard/ncdbg/blob/master/docs/VSCode.md)
 
