@@ -1,5 +1,7 @@
 # jira-git-workflow-hooks
-Git Integration for Jira JavaScript Hooks
+Git Integration for Jira JavaScript Hooks.
+
+*Required version of Git Integration for Jira: 2.20 and above.*
 
 # Scripts description
 
