@@ -3,6 +3,52 @@ Git Integration for Jira JavaScript Hooks.
 
 *Required version of Git Integration for Jira: 2.20 and above.*
 
+# Script paths and locations
+
+Script engine searches for scripts in `<Jira-HOME>/data/git-plugin/scripts`
+folder.
+
+Smart commit scripts are expected to be in
+`<Jira-HOME>/data/git-plugin/scripts/smartcommit` folder.
+
+Built-in smart-commit scripts are located in
+`<jira-git-plugin-repo>/code/src/main/resources/scripts/smartcommit` folder.
+
+Some example scripts are placed inside ZIP archives into
+`<jira-git-plugin-repo>/code/src/main/resources/scripts` folder.
+These ZIP archives are copied into $JIRA\_HOME/data/git\_plugin/scripts folder on first plugin start: 
+
+* script-examples.zip
+* smartcommit-examples.zip
+
+There is a cache for disk script lookup results. Script engine checks for `.js`
+file modification timestamp and if it has changed (or even it has gone away)
+then the disk script will be reloaded. Also there is a 5 seconds
+interval after the last check when the script engine does not re-check script on
+disk and just uses the cached script. It reduces the number of disk operations
+when a lot of scripts are executed in a small period of time.
+
+ 
+
+# Implemented scripts
+
+-   `smartcommit/<command-name>`
+
+-   `on-commit`
+
+-   `on-branch-created`
+
+-   `on-branch-updated`
+
+-   `on-branch-deleted`
+
+-   `on-merge-req-created`
+
+-   `on-merge-req-updated`
+
+-   `on-user-resolution`
+
+
 # Scripts description
 
 * [**on-branch-created script**](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/on-branch-created.js)
