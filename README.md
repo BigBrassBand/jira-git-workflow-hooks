@@ -131,7 +131,7 @@ when a lot of scripts are executed in a small period of time.
   
   **Applying**
   
-  Rename script in on-commit.js script and put in scripts folder.
+  Rename this script to the "on-commit.js" and put it in the "scripts" folder.
 
 * [**time script**](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/smartcommit/time.js)
   

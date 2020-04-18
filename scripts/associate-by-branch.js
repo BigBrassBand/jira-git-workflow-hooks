@@ -10,7 +10,7 @@
 // https://github.com/BigBrassBand/jira-git-workflow-hooks
 //
 //  Applying
-// Rename script in on-commit.js script and put in scripts folder.
+// Rename this script to the "on-commit.js" and put it in the "scripts" folder.
 //
 //  Classes passed as parameters by default
 //
