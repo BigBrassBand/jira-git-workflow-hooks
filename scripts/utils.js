@@ -36,7 +36,7 @@ function getIdForStatusWithName(statusName, possibleActionsList) {
 function getIdForStatusWithNameIgnoreCase(statusName, possibleActionsList) {
     var actionId = 0;
     for each (var actionDescriptor in possibleActionsList) {
-       	if(actionDescriptor.getName().toLowerCase() === statusName) {
+       	if (actionDescriptor.getName().toLowerCase() === statusName) {
        	    return actionDescriptor.getId();
        	}
     }
@@ -63,3 +63,9 @@ function formError(issue, i18nHelper, commandName, templateName) {
         commandName, issue.getKey(), i18nHelper.getText(templateName, issue.getKey(), getIssueState(issue))
     );
 }
+
+// Returns a logger to write into the Jira logs
+function getJiraLogger() {
+    return Java.type("org.apache.log4j.Logger").getLogger("com.bigbrassband.jira.git.services.scripting.ScriptService");
+}
+
