@@ -65,6 +65,11 @@
     var status = issue.getStatus();
     // use issue's assignee as user
     var user = issue.getAssignee();
+    if (user == null) {
+        // if there is no assignee -- use the reporter
+        user = issue.getReporter();
+    }
+
     // check that issue has IN_PROGRESS status
     if (status.getName() !== IN_PROGRESS)
         return;
