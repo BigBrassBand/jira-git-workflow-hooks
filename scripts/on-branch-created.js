@@ -45,24 +45,32 @@
     //get first issue key present in branchName
     var issueKey = getIssueKey(branchName);
     //check that issueKey is presenr in branch name
-    if (issueKey == null)
+    if (issueKey == null) {
+        getJiraLogger().debug("Can't find any issue key in the given branch name '" + branchName + "'. Exiting...");
         return;
+    }
 
     //find issue by key
+    getJiraLogger().debug("Looking for the issue with key '" + issueKey + "'...");
     var issue = issueManager.getIssueByCurrentKey(issueKey);
     var status = issue.getStatus();
     // use issue's assignee as user
     var user = issue.getAssignee();
     // check that issue has OPEN status
-    if (status.getName() !== OPEN)
+    getJiraLogger().debug("The issue with key '" + issueKey + "' has status '" + status.getName() + "'.");
+    if (status.getName() !== OPEN) {
+        getJiraLogger().debug("The issue with key '" + issueKey + "' has undesirable status. Exiting...");
         return;
+    }
 
     var possibleActionsList = getAcceptedNextSteps(workflowManager, issue);
     //retrieve new status id by his name from possible next statuses
     var newStatusId = getIdForStatusWithName(IN_PROGRESS, possibleActionsList);
     //if new status name is correct
-    if (newStatusId == null)
+    if (newStatusId == null) {
+        getJiraLogger().debug("Can't determine the next status for the issue with key '" + issueKey + "'. Exiting...");
         return;
+    }
 
     //get service to work with issue
     var issueService = getComponent("com.atlassian.jira.bc.issue.IssueService");
@@ -76,7 +84,9 @@
         print("branchName =", branchName);
         print("Errors during transition:");
         print(transitionValidationResult.getErrorCollection());
+        getJiraLogger().debug("Errors during transition for the issue with key '" + issueKey + "': " + transitionValidationResult.getErrorCollection());
     } else {
         issueService.transition(user, transitionValidationResult);
+        getJiraLogger().debug("Transition for the issue with key '" + issueKey + "' completed.");
     }
 })();
