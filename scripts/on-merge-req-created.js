@@ -68,9 +68,9 @@
     if (status.getName() !== OPEN)
         return;
 
-    var possibleActionsList = getAcceptedNextSteps(workflowManager, issue);
+    var possibleActionsList = getPossibleNextActions(workflowManager, issue);
     //retrieve new status id by his name from possible next statuses
-    var newStatusId = getIdForStatusWithName(IN_PROGRESS, possibleActionsList);
+    var newStatusId = getStatusIdForActionName(IN_PROGRESS, possibleActionsList);
     //if new status name is correct
     if (newStatusId == null)
         return;

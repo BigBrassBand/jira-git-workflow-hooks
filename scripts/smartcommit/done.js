@@ -80,7 +80,7 @@
 
     var status = issue.getStatus();
     //get acceptable next steps for current issue status
-    var possibleActionsList = getAcceptedNextSteps(workflowManager, issue);
+    var possibleActionsList = getPossibleNextActions(workflowManager, issue);
     //get command name in Jira's transition name form
     var commandName = command.getCommandName().replace(/-/g, " ");
     // check that possible actions are present
@@ -90,7 +90,7 @@
     }
 
     //retrieve new status id by his name from possible next statuses
-    var newStatusId = getIdForStatusWithNameIgnoreCase(commandName, possibleActionsList);
+    var newStatusId = getStatusIdForActionNameIgnoreCase(commandName, possibleActionsList);
     if (newStatusId == null) {
         commandResult.addError(formError(issue, i18nHelper, commandName, NO_ALLOWED_ACTIONS_TEMPLATE));
         return;

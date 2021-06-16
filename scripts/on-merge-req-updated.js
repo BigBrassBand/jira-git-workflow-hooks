@@ -78,9 +78,9 @@
     if (pullreq.requestState !== REQUEST_STATE)
         return;
 
-    var possibleActionsList = getAcceptedNextSteps(workflowManager, issue);
+    var possibleActionsList = getPossibleNextActions(workflowManager, issue);
     //retrieve new status id by his name from possible next statuses
-    var newStatusId = getIdForStatusWithName(DONE, possibleActionsList);
+    var newStatusId = getStatusIdForActionName(DONE, possibleActionsList);
     //if new status name is correct
     if (newStatusId == null)
         return;

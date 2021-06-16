@@ -14,29 +14,27 @@ function getIssueKey(stringField) {
 }
 
 //get accepted transitions from issue
-function getAcceptedNextSteps(workflowManager, issue) {
+function getPossibleNextActions(workflowManager, issue) {
     var status = issue.getStatus();
     var workFlow = workflowManager.getWorkflow(issue);
     var currentStep = workFlow.getLinkedStep(status);
     return currentStep.getActions();
 }
 
-//find status id by statusName among possibleActionsList
-function getIdForStatusWithName(statusName, possibleActionsList) {
-    var actionId = 0;
+//find status id by actionName among possibleActionsList
+function getStatusIdForActionName(actionName, possibleActionsList) {
     for each(var actionDescriptor in possibleActionsList) {
-        if (actionDescriptor.getName() === statusName) {
+        if (actionDescriptor.getName() === actionName) {
             return actionDescriptor.getId();
         }
     }
     return null;
 }
 
-//find status id by statusName among possibleActionsList
-function getIdForStatusWithNameIgnoreCase(statusName, possibleActionsList) {
-    var actionId = 0;
+//find status id by actionName among possibleActionsList
+function getStatusIdForActionNameIgnoreCase(actionName, possibleActionsList) {
     for each (var actionDescriptor in possibleActionsList) {
-       	if (actionDescriptor.getName().toLowerCase() === statusName) {
+       	if (actionDescriptor.getName().toLowerCase() === actionName.toLowerCase()) {
        	    return actionDescriptor.getId();
        	}
     }
@@ -54,8 +52,9 @@ function getComponent(componentName) {
 function formError(issue, i18nHelper, commandName, templateName) {
 
     function getIssueState(issue, i18nHelper) {
-        var s = issue.getStatusObject();
-        return s == null ? i18nHelper.getText(NO_STATUS) : s.getName();
+        return (issue.getStatusObject() == null) 
+            ? i18nHelper.getText("git.repository.smartcommits.transition.error.unknownstatus") 
+            : s.getName();
     };
 
     var errorHandler = Java.type("com.atlassian.jira.plugins.dvcs.smartcommits.model.CommitHookHandlerError");
