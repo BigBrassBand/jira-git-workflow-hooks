@@ -14,27 +14,27 @@ function getIssueKey(stringField) {
 }
 
 //get accepted transitions from issue
-function getAcceptedNextSteps(workflowManager, issue) {
+function getPossibleNextActions(workflowManager, issue) {
     var status = issue.getStatus();
     var workFlow = workflowManager.getWorkflow(issue);
     var currentStep = workFlow.getLinkedStep(status);
     return currentStep.getActions();
 }
 
-//find status id by statusName among possibleActionsList
-function getIdForStatusWithName(statusName, possibleActionsList) {
+//find status id by actionName among possibleActionsList
+function getStatusIdForActionName(actionName, possibleActionsList) {
     for each(var actionDescriptor in possibleActionsList) {
-        if (actionDescriptor.getName() === statusName) {
+        if (actionDescriptor.getName() === actionName) {
             return actionDescriptor.getId();
         }
     }
     return null;
 }
 
-//find status id by statusName among possibleActionsList
-function getIdForStatusWithNameIgnoreCase(statusName, possibleActionsList) {
+//find status id by actionName among possibleActionsList
+function getStatusIdForActionNameIgnoreCase(actionName, possibleActionsList) {
     for each (var actionDescriptor in possibleActionsList) {
-       	if (actionDescriptor.getName().toLowerCase() === statusName.toLowerCase()) {
+       	if (actionDescriptor.getName().toLowerCase() === actionName.toLowerCase()) {
        	    return actionDescriptor.getId();
        	}
     }

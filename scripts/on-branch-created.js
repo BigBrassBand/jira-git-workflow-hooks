@@ -68,14 +68,14 @@
         return;
     }
 
-    var possibleActionsList = getAcceptedNextSteps(workflowManager, issue);
-    //retrieve new status id by his name from possible next statuses
-    var newStatusId = getIdForStatusWithNameIgnoreCase(TRANSITION_NAME, possibleActionsList);
+    var possibleActionsList = getPossibleNextActions(workflowManager, issue);
+    //retrieve new status id by transition name from possible actions
+    var newStatusId = getStatusIdForActionNameIgnoreCase(TRANSITION_NAME, possibleActionsList);
     //if new status name is correct
     if (newStatusId == null) {
         jiraLog.error("Can't determine the next status for the issue with key '" + issueKey + "'." + 
             " Desirable transition name '" + TRANSITION_NAME + "'," + 
-            " but possible transitions are: " + possibleActionsList + ". Exiting...");
+            " but possible transitions (actions) are: " + possibleActionsList + ". Exiting...");
         return;
     }
 
