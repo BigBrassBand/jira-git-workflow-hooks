@@ -23,7 +23,6 @@ function getAcceptedNextSteps(workflowManager, issue) {
 
 //find status id by statusName among possibleActionsList
 function getIdForStatusWithName(statusName, possibleActionsList) {
-    var actionId = 0;
     for each(var actionDescriptor in possibleActionsList) {
         if (actionDescriptor.getName() === statusName) {
             return actionDescriptor.getId();
@@ -34,9 +33,8 @@ function getIdForStatusWithName(statusName, possibleActionsList) {
 
 //find status id by statusName among possibleActionsList
 function getIdForStatusWithNameIgnoreCase(statusName, possibleActionsList) {
-    var actionId = 0;
     for each (var actionDescriptor in possibleActionsList) {
-       	if (actionDescriptor.getName().toLowerCase() === statusName) {
+       	if (actionDescriptor.getName().toLowerCase() === statusName.toLowerCase()) {
        	    return actionDescriptor.getId();
        	}
     }
@@ -54,8 +52,9 @@ function getComponent(componentName) {
 function formError(issue, i18nHelper, commandName, templateName) {
 
     function getIssueState(issue, i18nHelper) {
-        var s = issue.getStatusObject();
-        return s == null ? i18nHelper.getText(NO_STATUS) : s.getName();
+        return (issue.getStatusObject() == null) 
+            ? i18nHelper.getText("git.repository.smartcommits.transition.error.unknownstatus") 
+            : s.getName();
     };
 
     var errorHandler = Java.type("com.atlassian.jira.plugins.dvcs.smartcommits.model.CommitHookHandlerError");

@@ -3,7 +3,7 @@
 
 //  Description
 //
-// This script does an automatic issue transition to "In progress" status if
+// This script does an automatic issue transition TRANSITION_NAME to the next status if
 // the issue is still in "Open" status when a branch has been created for the issue.
 // It works on the assumption that an issue key is present in the name of the created branch.
 // First issue's key from the created branch name will be taken as an issue for the transition.
@@ -13,7 +13,7 @@
 //
 //  Applying
 // Set name of open status in constant OPEN. By default "Open" is used.
-// Set name of needed transition in constant IN_PROGRESS. By default "Start Progress" is used.
+// Set name of needed transition in constant TRANSITION_NAME. By default "Start Progress" is used.
 //
 //  Classes passed as parameters by default
 //
@@ -34,46 +34,51 @@
 (function () {
     load(__DIR__ + 'utils.js');
 
-    //set required statuses names
-    var IN_PROGRESS = "Start Progress";
-    var OPEN = "Open";
+    var jiraLog = getJiraLogger();
+
+    // set original status and desirable transition name (aka action) to the next status.
+    var OPEN = "OPEN";
+    var TRANSITION_NAME = "START PROGRESS";
 
     //get needed components to execute main logic
     var workflowManager = getComponent("com.atlassian.jira.workflow.WorkflowManager");
     var issueManager = getComponent("com.atlassian.jira.issue.IssueManager");
+    var issueService = getComponent("com.atlassian.jira.bc.issue.IssueService");
 
     //get first issue key present in branchName
     var issueKey = getIssueKey(branchName);
     //check that issueKey is presenr in branch name
     if (issueKey == null) {
-        getJiraLogger().debug("Can't find any issue key in the given branch name '" + branchName + "'. Exiting...");
+        jiraLog.debug("Can't find any issue key in the given branch name '" + branchName + "'. Exiting...");
         return;
     }
 
-    //find issue by key
-    getJiraLogger().debug("Looking for the issue with key '" + issueKey + "'...");
+    // find issue by key
+    jiraLog.debug("Looking for the issue with key '" + issueKey + "'...");
     var issue = issueManager.getIssueByCurrentKey(issueKey);
     var status = issue.getStatus();
     // use issue's assignee as user
     var user = issue.getAssignee();
     // check that issue has OPEN status
-    getJiraLogger().debug("The issue with key '" + issueKey + "' has status '" + status.getName() + "'.");
-    if (status.getName() !== OPEN) {
-        getJiraLogger().debug("The issue with key '" + issueKey + "' has undesirable status. Exiting...");
+    jiraLog.debug("The issue with key '" + issueKey + "' has status '" + status.getName() + "'.");
+    // compare actual and desirable issue status in case insensetive way
+    if (status.getName().toLowerCase() !== OPEN.toLowerCase()) {
+        jiraLog.debug("The issue with key '" + issueKey + "' has undesirable status. " + 
+            " Expected status '" + OPEN + "', but actual is '" + status.getName() + "'. Exiting...");
         return;
     }
 
     var possibleActionsList = getAcceptedNextSteps(workflowManager, issue);
     //retrieve new status id by his name from possible next statuses
-    var newStatusId = getIdForStatusWithName(IN_PROGRESS, possibleActionsList);
+    var newStatusId = getIdForStatusWithNameIgnoreCase(TRANSITION_NAME, possibleActionsList);
     //if new status name is correct
     if (newStatusId == null) {
-        getJiraLogger().debug("Can't determine the next status for the issue with key '" + issueKey + "'. Exiting...");
+        jiraLog.error("Can't determine the next status for the issue with key '" + issueKey + "'." + 
+            " Desirable transition name '" + TRANSITION_NAME + "'," + 
+            " but possible transitions are: " + possibleActionsList + ". Exiting...");
         return;
     }
 
-    //get service to work with issue
-    var issueService = getComponent("com.atlassian.jira.bc.issue.IssueService");
     //validate changes
     var transitionValidationResult = issueService.validateTransition(
         user, issue.getId(), newStatusId, issueService.newIssueInputParameters()
@@ -84,9 +89,10 @@
         print("branchName =", branchName);
         print("Errors during transition:");
         print(transitionValidationResult.getErrorCollection());
-        getJiraLogger().debug("Errors during transition for the issue with key '" + issueKey + "': " + transitionValidationResult.getErrorCollection());
+        jiraLog.debug("Errors during transition for the issue with key '" + issueKey + "': " + transitionValidationResult.getErrorCollection());
     } else {
         issueService.transition(user, transitionValidationResult);
-        getJiraLogger().debug("Transition for the issue with key '" + issueKey + "' completed.");
+        jiraLog.debug("Transition for the issue with key '" + issueKey + "' completed.");
     }
 })();
+
