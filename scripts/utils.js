@@ -43,9 +43,14 @@ function getStatusIdForActionNameIgnoreCase(actionName, possibleActionsList) {
 
 //get component by component full name
 function getComponent(componentName) {
-    var componentAccessor = Java.type("com.atlassian.jira.component.ComponentAccessor");
+    var componentAccessor = getComponentAccessor();
     var clazz = Java.type("java.lang.Class")
     return componentAccessor.getOSGiComponentInstanceOfType(clazz.forName(componentName));
+}
+
+//get component accessor
+function getComponentAccessor() {
+    return Java.type("com.atlassian.jira.component.ComponentAccessor");
 }
 
 //form error message

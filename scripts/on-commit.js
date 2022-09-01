@@ -46,11 +46,7 @@
 
     //get user by authorEmail, authorName
     function getUser() {
-        var crowdService = getComponent(
-            "com.atlassian.jira.plugins.dvcs.smartcommits.GitPluginCompatibilityCrowdService"
-        );
-        var users = crowdService.getUserByEmailOrNull(authorEmail, authorName);
-
+        var users = getComponentAccessor().getUserSearchService().findUsersByEmail(authorEmail);
         if (users.isEmpty()) {
             print("Unknown Jira user");
         } else if (users.size() > 1) {
