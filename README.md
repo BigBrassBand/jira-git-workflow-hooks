@@ -11,12 +11,6 @@ folder.
 Smart commit scripts are expected to be in
 `<Jira-HOME>/data/git-plugin/scripts/smartcommit` folder.
 
-Some example scripts are placed inside ZIP archives into
-`<jira-git-plugin-repo>/code/src/main/resources/scripts` folder.
-These ZIP archives are copied into $JIRA\_HOME/data/git\_plugin/scripts folder on first plugin start: 
-
-* `script-examples.zip`
-* `smartcommit-examples.zip`
 
 There is a cache for disk script lookup results. Script engine checks for `.js`
 file modification timestamp and if it has changed (or even it has gone away)
