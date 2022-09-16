@@ -44,17 +44,15 @@
 (function () {
     load(__DIR__ + 'utils.js');
 
+    var jiraLog = getJiraLogger();
+
     //get user by authorEmail, authorName
     function getUser() {
-        var crowdService = getComponent(
-            "com.atlassian.jira.plugins.dvcs.smartcommits.GitPluginCompatibilityCrowdService"
-        );
-        var users = crowdService.getUserByEmailOrNull(authorEmail, authorName);
-
+        var users = getComponentAccessor().getUserSearchService().findUsersByEmail(authorEmail);
         if (users.isEmpty()) {
-            print("Unknown Jira user");
+            jiraLog.debug("Unknown Jira user");
         } else if (users.size() > 1) {
-            print("Ambiguous jira user");
+            jiraLog.debug("Ambiguous jira user");
         } else {
             return users.get(0);
         }
@@ -67,30 +65,50 @@
 
     //get needed components to execute main logic
     var workflowManager = getComponent("com.atlassian.jira.workflow.WorkflowManager");
-    var issueManager = getComponent("com.atlassian.jira.issue.IssueManager");
-    var issueService = getComponent("com.atlassian.jira.bc.issue.IssueService");
+    var issueService = getComponentAccessor().getIssueService();
     //check that issue key is present in the commit comment
     if (!commitProperties.issueCommit)
         return;
 
     //get first issue key present in the commit comment
     var issueKey = getIssueKey(commitComment);
-    var user = getUser();
     //validate user and issueKey
-    if (issueKey == null || user == null)
+    if (issueKey == null) {
+        jiraLog.debug("Can't find any issue key in the given commit comment '" + commitComment + "'. Exiting...");
         return;
+    }
+    var user = getUser();
+    if (user == null) {
+        jiraLog.debug("Can't find any user by given email '" + authorEmail + "'. Exiting...");
+        return;
+    }
 
-    var issue = issueManager.getIssueByCurrentKey(issueKey);
+    // find issue by key
+    jiraLog.debug("Looking for the issue with key '" + issueKey + "'...");
+    var issue = issueService.getIssue(user, issueKey).getIssue();
+//    issue.setAssignee(user);
     var status = issue.getStatus();
-    //check status name
-    if (status.getName() !== OPEN)
+    // check that issue has OPEN status
+    jiraLog.debug("The issue with key '" + issueKey + "' has status '" + status.getName() + "'.");
+    // compare actual and desirable issue status in case insensitive way
+    if (status.getName().toLowerCase() !== OPEN.toLowerCase()) {
+        jiraLog.debug("The issue with key '" + issueKey + "' has undesirable status. " +
+            " Expected status '" + OPEN + "', but actual is '" + status.getName() + "'. Exiting...");
         return;
+    }
 
     var possibleActionsList = getPossibleNextActions(workflowManager, issue);
-    var newStatusId = getStatusIdForActionName(IN_PROGRESS, possibleActionsList);
-    //check new status name
-    if (newStatusId == null)
+    //retrieve new status id by transition name from possible actions
+    var newStatusId = getStatusIdForActionNameIgnoreCase(IN_PROGRESS, possibleActionsList);
+    //if new status name is correct
+    if (newStatusId == null) {
+        jiraLog.error("Can't determine the next status for the issue with key '" + issueKey + "'." +
+            " Desirable transition name '" + IN_PROGRESS + "'," +
+            " but possible transitions (actions) are: " + possibleActionsList + ". Exiting...");
         return;
+    } else {
+        jiraLog.debug("It's determined the next status id: " + newStatusId);
+    }
 
     //validate transition
     var transitionValidationResult = issueService.validateTransition(
@@ -102,8 +120,10 @@
         print("revision =", revision);
         print("Errors during transition:");
         print(transitionValidationResult.getErrorCollection());
+        jiraLog.debug("Errors during transition for the issue with key '" + issueKey + "': " + transitionValidationResult.getErrorCollection());
     } else {
         // do transition
         issueService.transition(user, transitionValidationResult);
+        jiraLog.debug("Transition for the issue with key '" + issueKey + "' completed.");
     }
 })();

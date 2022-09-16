@@ -11,12 +11,6 @@ folder.
 Smart commit scripts are expected to be in
 `<Jira-HOME>/data/git-plugin/scripts/smartcommit` folder.
 
-Some example scripts are placed inside ZIP archives into
-`<jira-git-plugin-repo>/code/src/main/resources/scripts` folder.
-These ZIP archives are copied into $JIRA\_HOME/data/git\_plugin/scripts folder on first plugin start: 
-
-* `script-examples.zip`
-* `smartcommit-examples.zip`
 
 There is a cache for disk script lookup results. Script engine checks for `.js`
 file modification timestamp and if it has changed (or even it has gone away)
@@ -66,6 +60,7 @@ The below list shows all implemented events and the corresponding script names:
   Set name of open status in constant OPEN. By default "Open" is used.
   Set name of needed transition in constant IN_PROGRESS. By default "Start Progress" is used.
 
+
 * [**on-commit script**](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/on-commit.js)
 
   **Description**
@@ -81,6 +76,7 @@ The below list shows all implemented events and the corresponding script names:
   Set name of open status in constant OPEN. By default "Open" is used.
   Set name of needed transition in constant IN_PROGRESS. By default "Start Progress" is used.
 
+
 * [**on-merge-req-created script**](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/on-merge-req-created.js)
   
   **Description**
@@ -95,6 +91,7 @@ The below list shows all implemented events and the corresponding script names:
 
   Set name of open status in constant OPEN. By default "Open" is used.
   Set name of needed transition in constant IN_PROGRESS. By default "Start Progress" is used.
+
 
 * [**on-merge-req-updated script**](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/on-merge-req-updated.js)
   
@@ -113,6 +110,7 @@ The below list shows all implemented events and the corresponding script names:
   Set name of needed transition in constant DONE. By default "Resolve Issue" is used.
   Set name of needed request state in constant REQUEST_STATE. By default "merged" is used.
 
+
 * [**on-user-resolution script**](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/on-user-resolution.js)
   
   **Description**
@@ -124,6 +122,7 @@ The below list shows all implemented events and the corresponding script names:
 
   Set name of smart commit user in constant SMARTCOMMIT_USER_NAME. By default "smartcommituser" is used.
   
+
 * [**associate-by-branch**](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/associate-by-branch.js)
 
   **Description**
@@ -136,6 +135,7 @@ The below list shows all implemented events and the corresponding script names:
   
   Rename this script to the "on-commit.js" and put it in the "scripts" folder.
 
+
 * [**time script**](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/smartcommit/time.js)
   
   **Description**
@@ -147,6 +147,7 @@ The below list shows all implemented events and the corresponding script names:
 
   Set i18n key for appropriate message in constant ERROR_MESSAGE.
   
+
 * [**done script**](https://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/smartcommit/done.js)
   
   **Description**
@@ -161,7 +162,51 @@ The below list shows all implemented events and the corresponding script names:
 
   Set appropriate keys for error messages in constants: NO_STATUS, NO_ALLOWED_ACTIONS_TEMPLATE, UNKNOWN_VERSION.
   Command name will be used as transition name.
-  
+
+* [**duedate script**](https://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/smartcommit/duedate.js)
+
+  **Description**
+
+  TBD
+
+  **Applying**
+
+  TBD
+
+
+* [**original script**](https://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/smartcommit/original.js)
+
+  **Description**
+
+  TBD
+
+  **Applying**
+
+  TBD
+
+
+* [**priority script**](https://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/smartcommit/priority.js)
+
+  **Description**
+
+  TBD
+
+  **Applying**
+
+  TBD
+
+
+* [**remaining script**](https://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/smartcommit/remaining.js)
+
+  **Description**
+
+  TBD
+
+  **Applying**
+
+  TBD
+
+
 * [**utils script**](http://github.com/BigBrassBand/jira-git-workflow-hooks/blob/master/scripts/utils.js)
   
   **Description**
