@@ -70,6 +70,6 @@ function formError(issue, i18nHelper, commandName, templateName) {
 
 // Returns a logger to write into the Jira logs
 function getJiraLogger() {
-    return Java.type("org.apache.log4j.Logger").getLogger("com.bigbrassband.jira.git.services.scripting.ScriptService");
+    return Java.type("org.slf4j.LoggerFactory").getLogger("com.bigbrassband.jira.git.services.scripting.ScriptService");
 }
 
